@@ -44,4 +44,4 @@ General instructions on _how_ to contribute can be found under [Contributing](Co
 
 ## License
 
-Code released under the [MIT](LICENSES/MIT.txt).
+Code released under the [MIT](LICENSE).
