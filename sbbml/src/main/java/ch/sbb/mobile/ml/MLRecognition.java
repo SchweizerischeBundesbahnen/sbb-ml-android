@@ -9,12 +9,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-public class Recognition {
+public class MLRecognition {
     private final String title;
     private final Float confidence;
     private RectF location;
 
-    public Recognition(final String title, final Float confidence, final RectF location) {
+    public MLRecognition(final String title, final Float confidence, final RectF location) {
         this.title = title;
         this.confidence = confidence;
         this.location = location;

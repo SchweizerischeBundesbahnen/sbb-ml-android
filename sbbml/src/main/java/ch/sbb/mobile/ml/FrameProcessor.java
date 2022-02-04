@@ -38,7 +38,7 @@ import timber.log.Timber;
  * Some functions are C++ optimized.
  */
 
-public class FrameProcessor {
+class FrameProcessor {
 
     public interface FrameProcessorListener {
         void foundObjects(List<MultiBoxTracker.TrackedRecognition> objectList);
@@ -172,7 +172,7 @@ public class FrameProcessor {
     private void detectObjects(byte[] luminance, long lastTimestamp) {
         Timber.i("detectObjects");
         final long startTime = SystemClock.uptimeMillis();
-        List<Recognition> results = new ArrayList<>();
+        List<MLRecognition> results = new ArrayList<>();
         try {
             results = detector.recognizeImage(scaledBitmap);
         } catch (IOException e) {
@@ -180,10 +180,10 @@ public class FrameProcessor {
             return;
         }
 
-        final List<Recognition> validResults = new ArrayList<>();
+        final List<MLRecognition> validResults = new ArrayList<>();
         lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
 
-        for (final Recognition result : results) {
+        for (final MLRecognition result : results) {
             final RectF location = result.getLocation();
             if (location != null &&
                     result.getConfidence() >= mlSettings.getMinimumConfidence() &&
@@ -204,7 +204,7 @@ public class FrameProcessor {
         publishDetectionResults(validResults);
     }
 
-    private synchronized void publishDetectionResults(List<Recognition> validResults) {
+    private synchronized void publishDetectionResults(List<MLRecognition> validResults) {
         frameRecognitions.clear();
         if(mlSettings.isUseTracker()) {
             List<MultiBoxTracker.TrackedRecognition> trackedRecognitions = multiBoxTracker.publish();
@@ -214,7 +214,7 @@ public class FrameProcessor {
                 }
             }
         } else {
-            for(final Recognition validResult: validResults) {
+            for(final MLRecognition validResult: validResults) {
                 frameRecognitions.add(new MultiBoxTracker.TrackedRecognition(null, validResult.getLocation(), validResult.getConfidence(), validResult.getTitle()));
             }
         }

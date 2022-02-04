@@ -23,7 +23,7 @@ import timber.log.Timber
  * are associated with the ObjectTracker that created them, and are only valid while that
  * ObjectTracker still exists.
  */
-class ObjectTracker protected  constructor(protected val frameWidth: Int, protected val frameHeight: Int, private val rowStride: Int, protected val alwaysTrack: Boolean) {
+internal class ObjectTracker protected  constructor(protected val frameWidth: Int, protected val frameHeight: Int, private val rowStride: Int, protected val alwaysTrack: Boolean) {
 
     private val downsampledFrame: ByteArray
     private val trackedObjects: MutableMap<String, TrackedObject>
@@ -372,12 +372,6 @@ class ObjectTracker protected  constructor(protected val frameWidth: Int, protec
             }
         }
 
-        /**
-         * How many frames of optical flow deltas to record.
-         * TODO(andrewharp): Push this down to the native level so it can be polled
-         * efficiently into a an array for upload, instead of keeping a duplicate
-         * copy in Java.
-         */
         private val MAX_FRAME_HISTORY_SIZE = 200
 
         private val DOWNSAMPLE_FACTOR = 2

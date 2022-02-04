@@ -21,7 +21,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
@@ -153,7 +152,7 @@ class TFLiteObjectDetector {
     return options;
   }
   
-  public List<Recognition> recognizeImage(final Bitmap bitmap) throws IOException {
+  public List<MLRecognition> recognizeImage(final Bitmap bitmap) throws IOException {
     Trace.beginSection("recognizeImage");
     TensorImage tensorImage = new TensorImage(DataType.FLOAT32);
     tensorImage.load(bitmap);
@@ -185,7 +184,7 @@ class TFLiteObjectDetector {
     Trace.endSection();
 
     int numDetectionsOutput = min(maxNumberOfOutput, (int) numDetections[0]);
-    final ArrayList<Recognition> recognitions = new ArrayList<>(numDetectionsOutput);
+    final ArrayList<MLRecognition> recognitions = new ArrayList<>(numDetectionsOutput);
     for (int i = 0; i < numDetectionsOutput; ++i) {
       final RectF detection = new RectF(
               outputLocations[0][i][1] * mlSettings.getModelInputSize(),
@@ -195,7 +194,7 @@ class TFLiteObjectDetector {
 
       int labelIndex = (int) outputClasses[0][i];
       if(labelIndex < labels.size()) {
-        recognitions.add( new Recognition(labels.get(labelIndex), outputScores[0][i], detection));
+        recognitions.add( new MLRecognition(labels.get(labelIndex), outputScores[0][i], detection));
       }
     }
     Trace.endSection(); // "recognizeImage"

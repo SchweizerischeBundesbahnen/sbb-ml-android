@@ -1,3 +1,6 @@
+/*
+ * Copyright 2022 SBB AG. License: CC0-1.0
+ */
 package ch.sbb.mobile.ml.demo;
 
 import android.graphics.Canvas;
@@ -12,16 +15,20 @@ import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.slider.Slider;
+
 import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 import java.util.List;
 import ch.sbb.mobile.ml.MLFragment;
+import ch.sbb.mobile.ml.MLRecognition;
 import ch.sbb.mobile.ml.MLSettings;
-import ch.sbb.mobile.ml.Recognition;
 import ch.sbb.mobile.ml.demo.databinding.CameraViewBinding;
 import timber.log.Timber;
 
@@ -205,6 +212,7 @@ public class DemoActivity extends FragmentActivity implements MLFragment.Detecti
     return modelFilename;
   }
 
+  // open the ML fragment
   protected void setFragment() {
       mlFragment = MLFragment.newInstance(mlSettings);
       getSupportFragmentManager().beginTransaction().replace(R.id.mlfragment_container, mlFragment, MLFragment.TAG).commitNow();
@@ -293,7 +301,7 @@ public class DemoActivity extends FragmentActivity implements MLFragment.Detecti
   }
 
   @Override
-  public void drawObjects(Canvas canvas, View view, List<Recognition> objects) {
+  public void drawObjects(Canvas canvas, View view, List<MLRecognition> objects) {
     updateFrameTime();
     multiBoxRenderer.draw(canvas, view, objects);
   }

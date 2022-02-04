@@ -29,7 +29,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import timber.log.Timber;
 
-public class CameraPreview {
+class CameraPreview {
 
     private CameraCaptureSession captureSession;
     private CameraDevice cameraDevice;

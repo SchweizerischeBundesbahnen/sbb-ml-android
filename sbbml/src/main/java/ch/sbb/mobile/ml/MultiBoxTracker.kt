@@ -9,9 +9,9 @@ import timber.log.Timber
 import java.util.*
 import java.util.concurrent.Semaphore
 
-class MultiBoxTracker() {
+internal class MultiBoxTracker protected  constructor() {
 
-    var objectTracker: ObjectTracker? = null
+    internal var objectTracker: ObjectTracker? = null
     internal val screenRects: MutableList<Pair<Float, RectF>> = LinkedList()
     private val trackedObjects = LinkedList<TrackedRecognition>()
     private val trackedObjectsSemaphore = Semaphore(1)
@@ -59,7 +59,7 @@ class MultiBoxTracker() {
         }
     }
 
-    fun trackResults(results: List<Recognition>, frame: ByteArray, timestamp: Long) {
+    fun trackResults(results: List<MLRecognition>, frame: ByteArray, timestamp: Long) {
         Timber.i("Processing ${results.size} results from timestamp $timestamp")
         processResults(timestamp, results, frame)
     }
@@ -103,8 +103,8 @@ class MultiBoxTracker() {
         trackedObjectsSemaphore.release()
     }
 
-    private fun processResults(timestamp: Long, results: List<Recognition>, originalFrame: ByteArray) {
-        val rectsToTrack = LinkedList<Pair<Float, Recognition>>()
+    private fun processResults(timestamp: Long, results: List<MLRecognition>, originalFrame: ByteArray) {
+        val rectsToTrack = LinkedList<Pair<Float, MLRecognition>>()
         screenRects.clear()
 
         for (result in results) {
@@ -119,7 +119,7 @@ class MultiBoxTracker() {
                 continue
             }
 
-            rectsToTrack.add(Pair<Float, Recognition>(result.confidence, result))
+            rectsToTrack.add(Pair<Float, MLRecognition>(result.confidence, result))
         }
 
         if (rectsToTrack.isEmpty()) {
@@ -148,7 +148,7 @@ class MultiBoxTracker() {
         }
     }
 
-    private fun handleDetection(frameCopy: ByteArray, timestamp: Long, potential: Pair<Float, Recognition>) {
+    private fun handleDetection(frameCopy: ByteArray, timestamp: Long, potential: Pair<Float, MLRecognition>) {
         val potentialObject = objectTracker!!.trackObject(potential.second.location!!, timestamp, frameCopy)
 
         if (potentialObject.currentCorrelation < MARGINAL_CORRELATION) {

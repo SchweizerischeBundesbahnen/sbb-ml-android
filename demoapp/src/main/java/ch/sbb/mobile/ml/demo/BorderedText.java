@@ -1,3 +1,6 @@
+/*
+ * Copyright 2022 SBB AG. License: CC0-1.0
+ */
 package ch.sbb.mobile.ml.demo;
 
 import android.graphics.Canvas;

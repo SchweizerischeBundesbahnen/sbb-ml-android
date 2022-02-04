@@ -26,7 +26,7 @@ public class ObjectDetectorTest {
     @Test
     public void detectObject() throws Exception {
         Bitmap bitmap = loadImage("wagen_448.jpg");
-        List<Recognition> detectedObjects = tfLiteObjectDetector.recognizeImage(bitmap);
+        List<MLRecognition> detectedObjects = tfLiteObjectDetector.recognizeImage(bitmap);
         assertThat(detectedObjects.size()).isEqualTo(13);
     }
 
@@ -37,7 +37,7 @@ public class ObjectDetectorTest {
         tfLiteObjectDetector.recognizeImage(bitmap);
         tfLiteObjectDetector.recognizeImage(bitmap);
         tfLiteObjectDetector.recognizeImage(bitmap);
-        List<Recognition> detectedObjects = tfLiteObjectDetector.recognizeImage(bitmap);
+        List<MLRecognition> detectedObjects = tfLiteObjectDetector.recognizeImage(bitmap);
         assertThat(detectedObjects.size()).isEqualTo(13);
     }
 }

@@ -24,8 +24,8 @@ public class MultiBoxTrackerTest {
 
     @Test
     public void trackerReturnsTheLastDetectedRect() throws Exception {
-        final List<Recognition> objectDetectorResults = new ArrayList<>();
-        final Recognition detectedRect = new Recognition("title", 0.8f, new RectF(100, 100, 200, 200));
+        final List<MLRecognition> objectDetectorResults = new ArrayList<>();
+        final MLRecognition detectedRect = new MLRecognition("title", 0.8f, new RectF(100, 100, 200, 200));
         objectDetectorResults.add(detectedRect);
 
         Bitmap bitmap = loadImage("wagen_448.jpg");
@@ -46,8 +46,8 @@ public class MultiBoxTrackerTest {
 
     @Test
     public void trackerReturnsTheLastDetectedRectAgain() throws Exception {
-        final List<Recognition> objectDetectorResults = new ArrayList<>();
-        final Recognition detectedRect = new Recognition("title", 0.8f, new RectF(100, 100, 200, 200));
+        final List<MLRecognition> objectDetectorResults = new ArrayList<>();
+        final MLRecognition detectedRect = new MLRecognition("title", 0.8f, new RectF(100, 100, 200, 200));
         objectDetectorResults.add(detectedRect);
 
         Bitmap bitmap = loadImage("wagen_448.jpg");

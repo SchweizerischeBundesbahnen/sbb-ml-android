@@ -63,7 +63,7 @@ public class MLFragment extends Fragment implements OnImageAvailableListener, Fr
      * @param view can used to set a touch listener on objects.
      * @param objects the detected objects and their locations on the canvas.
      */
-    void drawObjects(Canvas canvas, View view, List<Recognition> objects);
+    void drawObjects(Canvas canvas, View view, List<MLRecognition> objects);
 
     /**
      * User denied to give camera access asked by the library.
@@ -85,7 +85,7 @@ public class MLFragment extends Fragment implements OnImageAvailableListener, Fr
   private MLSettings mlSettings;
   private AutoFitTextureView textureView;
   private Integer sensorOrientation;
-  private final List<Recognition> canvasObjects = new ArrayList<>();
+  private final List<MLRecognition> canvasObjects = new ArrayList<>();
   private OverlayView trackingOverlay;
   private CameraPreview cameraPreview;
   private FrameProcessor frameProcessor;
@@ -301,11 +301,11 @@ public class MLFragment extends Fragment implements OnImageAvailableListener, Fr
     canvasObjects.clear();
     CopyOnWriteArrayList<MultiBoxTracker.TrackedRecognition> unmutableCopyOfTrackedRecognitions = new CopyOnWriteArrayList(frameRecognitions);
     for (final MultiBoxTracker.TrackedRecognition recognition : unmutableCopyOfTrackedRecognitions) {
-      Recognition detectedObject;
+      MLRecognition detectedObject;
       if(recognition.getTrackedObject() != null) {
-        detectedObject = new Recognition(recognition.getTitle(), recognition.getDetectionConfidence(), recognition.getTrackedObject().getTrackedPositionInPreviewFrame());
+        detectedObject = new MLRecognition(recognition.getTitle(), recognition.getDetectionConfidence(), recognition.getTrackedObject().getTrackedPositionInPreviewFrame());
       } else {
-        detectedObject = new Recognition(recognition.getTitle(), recognition.getDetectionConfidence(), recognition.getLocation());
+        detectedObject = new MLRecognition(recognition.getTitle(), recognition.getDetectionConfidence(), recognition.getLocation());
       }
 
       final RectF trackedPos = new RectF(detectedObject.getLocation());

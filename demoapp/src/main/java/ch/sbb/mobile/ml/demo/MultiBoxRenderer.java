@@ -1,3 +1,6 @@
+/*
+ * Copyright 2022 SBB AG. License: CC0-1.0
+ */
 package ch.sbb.mobile.ml.demo;
 
 import android.content.Context;
@@ -14,9 +17,12 @@ import android.view.View;
 import java.util.List;
 import java.util.Locale;
 
-import ch.sbb.mobile.ml.Recognition;
+import ch.sbb.mobile.ml.MLRecognition;
 import timber.log.Timber;
 
+/*
+ * Draw a bounding box around an object.
+ */
 class MultiBoxRenderer {
   private static final float TEXT_SIZE_DIP = 18;
   private final Paint boxPaint = new Paint();
@@ -33,11 +39,11 @@ class MultiBoxRenderer {
     borderedText = new BorderedText(textSizePx);
   }
 
-  public void draw(final Canvas canvas, View view, List<Recognition> trackedObjects) {
+  public void draw(final Canvas canvas, View view, List<MLRecognition> trackedObjects) {
     Timber.i("Draw number of objects: %d", trackedObjects.size());
 
     // draw objects
-    for (final Recognition trackedPos : trackedObjects) {
+    for (final MLRecognition trackedPos : trackedObjects) {
       float cornerSize = Math.min(trackedPos.getLocation().width(), trackedPos.getLocation().height()) / 8.0f;
       canvas.drawRoundRect(trackedPos.getLocation(), cornerSize, cornerSize, boxPaint);
 
@@ -45,10 +51,10 @@ class MultiBoxRenderer {
       borderedText.drawText(canvas, trackedPos.getLocation().left + cornerSize, trackedPos.getLocation().top, labelString + "%", boxPaint);
     }
 
-    // this touch listener is a sample code, it just writes touched object name on logger.
+    // this touch listener is a sample code to get touch events. It just writes touched object name on logger.
     view.setOnTouchListener((v, event) -> {
       if(event.getAction() == MotionEvent.ACTION_DOWN) {
-        for (final Recognition trackedPos : trackedObjects) {
+        for (final MLRecognition trackedPos : trackedObjects) {
           if(event.getX() > trackedPos.getLocation().left &&
              event.getX() < trackedPos.getLocation().right &&
              event.getY() > trackedPos.getLocation().top &&

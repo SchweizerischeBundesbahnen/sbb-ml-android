@@ -108,6 +108,7 @@ class ImageUtils {
     }
   }
 
+  // this is done in C++ at the moment
   private static int YUV2RGB(int y, int u, int v) {
     // Adjust and check YUV values
     y = Math.max((y - 16), 0);
