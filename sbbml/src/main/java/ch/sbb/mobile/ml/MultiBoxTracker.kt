@@ -92,7 +92,7 @@ internal class MultiBoxTracker protected  constructor() {
         for (recognition in copyList) {
             val trackedObject = recognition.trackedObject
             trackedObject?.let {
-                val correlation = trackedObject!!.currentCorrelation
+                val correlation = trackedObject.currentCorrelation
                 if (correlation < MIN_CORRELATION) {
                     Timber.i("Removing tracked object ${recognition.title} because NCC is $correlation")
                     trackedObject.stopTracking()
@@ -171,7 +171,7 @@ internal class MultiBoxTracker protected  constructor() {
                 val intersects = intersection.setIntersect(a!!, b!!)
 
                 val intersectArea = intersection.width() * intersection.height()
-                val totalArea = a!!.width() * a.height() + b!!.width() * b.height() - intersectArea
+                val totalArea = a.width() * a.height() + b.width() * b.height() - intersectArea
                 val intersectOverUnion = intersectArea / totalArea
 
                 // If there is an intersection with this currently tracked box above the maximum overlap
