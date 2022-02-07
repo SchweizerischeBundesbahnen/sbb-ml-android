@@ -18,12 +18,21 @@ Copy your object detection ML model to assets folder. The main components are ca
 
 If you create an Android app and publish it then you may want to test with many different devices. Low-end and high-end Android devices have a huge difference in performance and you have to solve it in your app. The DetectionListener interface gives you the inference time of each image. Use it to check how fast the app is. If the time is more than 500ms then it would be better to switch to a smaller ML model or use different input size. So it would be good to prepare your app with couple of different ML models and switch them on the fly based on inference time. 
 
-When running in CPU then the device gets warm. A warm Android device starts limiting CPU power and thus the inference time increase.
-
 It is best to test the demo app object detection performance in a real environment where there are objects of SBB, like in SBB trains or at train stations. If you test e.g. in your living room you will just get false detected objects. The object detection works in the target environment where it was designed to work. You may also get bad results if you open images of SBB objects on your computer screen and try to detected them due to flicker effect on the screen.    
+
+## ML Models 
+
+The inference lib was developed to run Yolo ML models on Android in optimal way. The demo app contains several different size models. 
+
+### How to convert Yolo model to tflite with correct metadata
+
+The model metadata must be correctly set in order to run a Yolo model with this library. 
+
+TODO: The Yolo -> tflite converter will be published soon which will set the model metadata correctly. 
 
 ## Known issues
 
+* When running in CPU then the device gets warm. A warm Android device starts limiting CPU power and thus the inference time increase.
 * On NNAPI we see often very similar performance as with CPU. 
 * GPU may accelerate inference time a lot but it depends on your device. On some device GPU inference is fast but it blocks the UI thread, so it does not look nice on UI. This is a known issue for Tensorflow team: https://github.com/tensorflow/tensorflow/issues/43073 
 * Some Pixel devices don't let GPU to be used for inferencing.
