@@ -177,7 +177,7 @@ class TFLiteObjectDetector {
     try {
       tfLite.runForMultipleInputsOutputs(inputImageAsArray, outputMap);
     } catch (Exception e) {
-      Timber.e("Failed to run the model " + e.toString());
+      Timber.e("Failed to run the model %s", e.toString());
       Trace.endSection();
       throw new IOException("failed to run: " + e.toString());
     }
