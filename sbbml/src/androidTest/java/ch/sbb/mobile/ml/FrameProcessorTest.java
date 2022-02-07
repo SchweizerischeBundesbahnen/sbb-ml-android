@@ -37,7 +37,7 @@ public class FrameProcessorTest  {
             }
 
             @Override
-            public void info(String frameInfo, String scaleInfo, int inferenceTime) {
+            public void info(Size frameInfo, Size scaleInfo, int inferenceTime) {
 
             }
         });
