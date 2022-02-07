@@ -25,12 +25,9 @@ public class CameraPreviewTest  {
     @Test
     public void cameraOutputSizes() {
         Size[] sizes = cameraPreview.getCameraOutputSizes(getApplicationContext());
-        for(int  i = 0; i < sizes.length; i++) {
-            if((sizes[i].getWidth() == 800) && (sizes[i].getHeight() == 600)) {
-                return;
-            }
+        if(sizes.length == 0) {
+            Assert.fail("No camera size found");
         }
-        Assert.fail("800x600 camera size not found");
     }
 
     @Test
