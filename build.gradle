@@ -1,5 +1,7 @@
 buildscript {
     ext.kotlin_version = '1.5.30'
+    ext.dokka_version = '1.5.0'
+
     repositories {
         google()
         mavenCentral()
@@ -7,7 +9,12 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
     }
+}
+
+plugins {
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
 allprojects {
