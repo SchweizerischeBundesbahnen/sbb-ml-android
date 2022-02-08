@@ -1,7 +1,9 @@
 name: Publish package to the Maven Central Repository
 on:
-  release:
-    types: [synchronize]
+  #release:
+  #  types: [synchronize]
+  push:
+    branches: [ main ]
 jobs:
   publish:
     name: Release build and publish
@@ -28,7 +30,7 @@ jobs:
 
     # Runs upload, and then closes & releases the repository
     - name: Publish to MavenCentral
-      run: ./gradlew publish --max-workers 1 closeAndReleaseSonatypeStagingRepository
+      run: ./gradlew publish # use this cmd to avoid nexus release approve: --max-workers 1 closeAndReleaseSonatypeStagingRepository
       env:
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
