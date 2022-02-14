@@ -15,7 +15,7 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
-        cache: gradle
+        #cache: gradle
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
@@ -25,12 +25,12 @@ jobs:
       run: ./gradlew sbbml:assembleRelease
 
     # Generates other artifacts 
-    #- name: Source jar and dokka
-    #  run: ./gradlew androidSourcesJar javadocJar
+    - name: Source jar and dokka
+      run: ./gradlew androidSourcesJar androidJavadocJar
 
     # Runs upload, and then closes & releases the repository
     - name: Publish to MavenCentral
-      run: ./gradlew sbbml:publishReleasePublicationToSonatypeRepository --scan # use this cmd to avoid nexus release approve: --max-workers 1 closeAndReleaseSonatypeStagingRepository
+      run: ./gradlew sbbml:publishReleasePublicationToSonatypeRepository --stackTrace # use this cmd to avoid nexus release approve: --max-workers 1 closeAndReleaseSonatypeStagingRepository
       env:
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
