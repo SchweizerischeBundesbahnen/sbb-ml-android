@@ -4,8 +4,7 @@ apply plugin: 'kotlin-android'
 apply from: '../version-code.gradle'
 
 ext {
-    // Provide your own coordinates here
-    PUBLISH_GROUP_ID = 'ch.sbb.mobile.ml'
+    PUBLISH_GROUP_ID = 'ch.sbb'
     PUBLISH_VERSION = PUBLISH_VERSION
     PUBLISH_ARTIFACT_ID = 'sbbml'
 }
