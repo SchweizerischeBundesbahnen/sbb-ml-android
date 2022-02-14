@@ -29,7 +29,7 @@ afterEvaluate{
     publishing {
         publications {
             release(MavenPublication)  {
-                groupId 'ch.sbb'
+                groupId 'ch.sbb.mobile.ml'
                 version PUBLISH_VERSION
                 artifactId 'sbbml'
 
