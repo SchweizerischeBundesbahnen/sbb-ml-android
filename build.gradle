@@ -5,25 +5,32 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
+        classpath "io.github.gradle-nexus:publish-plugin:1.1.0"
     }
 }
 
-plugins {
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
-}
+apply plugin: 'io.github.gradle-nexus.publish-plugin'
 
 allprojects {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+apply from: "${rootDir}/sbbml_nexus_publish.gradle"

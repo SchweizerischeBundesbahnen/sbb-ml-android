@@ -3,6 +3,7 @@ apply plugin: 'signing'
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka'
+
 apply from: '../version-code.gradle'
 
 android {
@@ -93,31 +94,10 @@ artifacts {
     archives androidSourcesJar, androidJavadocsJar
 }
 
-signing {
-    useInMemoryPgpKeys(
-            System.getenv("PGP_KEYID"),
-            System.getenv("PGP_KEY"),
-            System.getenv("PGP_PASSWORD"),
-    )
-    sign publishing.publications
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            username = System.getenv("SONATYPE_USERNAME")
-            password = System.getenv("SONATYPE_PASSWORD")
-            stagingProfileId = System.getenv("SONATYPE_STAGINGPROFILEID")
-        }
-    }
-}
-
-afterEvaluate {
+afterEvaluate{
     publishing {
         publications {
-            aar(MavenPublication) {
+            maven(MavenPublication)  {
                 groupId 'ch.sbb.mobile.ml'
                 version PUBLISH_VERSION
                 artifactId 'sbbml'
@@ -138,8 +118,15 @@ afterEvaluate {
             }
         }
     }
+    signing {
+        useInMemoryPgpKeys(
+                System.getenv("PGP_KEYID"),
+                System.getenv("PGP_KEY"),
+                System.getenv("PGP_PASSWORD"),
+        )
+        sign publishing.publications
+    }
 }
-
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.1'
