@@ -7,7 +7,13 @@ This library simplifies the integration of object detection models into Android 
 In addition to object detection there is also a object tracker algorithm. The tracker is a fast C++ optimised algorithm which is able to follow an object if the camera moves only slightly. The tracker smooths object detection results because object position is tracked several times while the object detection is done only once at the same time. It is possible to enable/disable the tracker in settings.
 
 This project also contains a sample app which demos how the library works. It has also several sample object detection models. A model is selected based on user chosen settings on App UI.
-  
+
+## Gradle
+
+implementation 'ch.sbb.mobile.ml:sbbml:1.0.2'
+
+Check the latest version at https://repo1.maven.org/maven2/ch/sbb/mobile/ml/sbbml/
+ 
 ## Minimum supported Android Version
 
 * Android API Level 25
