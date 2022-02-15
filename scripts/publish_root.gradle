@@ -9,3 +9,6 @@ nexusPublishing {
         }
     }
 }
+
+String test = System.getenv("TEST")
+println "TEST PRINT " + test

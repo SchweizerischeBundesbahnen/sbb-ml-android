@@ -62,6 +62,10 @@ afterEvaluate{
     }
 }
 
+
+String test = System.getenv("TEST")
+println "TEST PRINT2 " + test
+
 signing {
     useInMemoryPgpKeys(
             System.getenv("PGP_KEYID"),
