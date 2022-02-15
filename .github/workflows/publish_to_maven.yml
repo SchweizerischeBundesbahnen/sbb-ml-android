@@ -1,5 +1,7 @@
 name: Publish package to the Maven Central Repository
 
+# guide: https://proandroiddev.com/publishing-android-libraries-to-mavencentral-in-2021-8ac9975c3e52
+
 # release is triggered when the release is created and published on github.
 on:
   release:
