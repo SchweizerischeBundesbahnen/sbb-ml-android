@@ -35,8 +35,6 @@ afterEvaluate{
 
                 from components.release
 
-                //artifact("$buildDir/outputs/aar/sbbml-release.aar")
-
                 artifact androidSourcesJar
                 artifact androidJavadocsJar
 

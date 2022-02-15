@@ -10,6 +10,8 @@ ext {
 
 apply from: "${rootProject.projectDir}/scripts/publish_module.gradle"
 
+println "VER" + PUBLISH_VERSION
+
 android {
     compileSdkVersion 31
     buildToolsVersion '30.0.3'
