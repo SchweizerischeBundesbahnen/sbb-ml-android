@@ -5,7 +5,11 @@ ext["signing.keyId"] = System.getenv('PGP_KEYID')
 ext["signing.password"] = System.getenv('PGP_PASSWORD')
 ext["signing.key"] = System.getenv('PGP_KEY')
 
+
+
 nexusPublishing {
+    
+    println "VER " + MavenPublication by publishing.publications.version
 
     repositories {
         sonatype {
