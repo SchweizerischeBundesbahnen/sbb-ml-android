@@ -6,12 +6,12 @@ ext["signing.password"] = System.getenv('PGP_PASSWORD')
 ext["signing.key"] = System.getenv('PGP_KEY')
 
 nexusPublishing {
+    useStaging.set(provider {
+        val release: MavenPublication by publishing.publications
+        release.version.endsWith("-SNAPSHOT")
+    })
     repositories {
         sonatype {
-            useStaging.set(provider {
-                val release: MavenPublication by publishing.publications
-                release.version.endsWith("-SNAPSHOT")
-            })
             stagingProfileId = sonatypeStagingProfileId
             //nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
             //snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
