@@ -2,9 +2,8 @@ name: Publish package to the Maven Central Repository
 on:
   release:
     types: [published]
-
-  #push:
-  #  branches: [ main ]
+  push:
+    branches: [main]
 jobs:
   publish:
     name: Release build and publish

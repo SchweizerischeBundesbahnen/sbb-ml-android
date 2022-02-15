@@ -48,7 +48,12 @@ afterEvaluate{
                             url = 'https://github.com/SchweizerischeBundesbahnen/mobile-android-ml/blob/main/LICENSE'
                         }
                     }
-
+                    developers {
+                        developer {
+                            name = 'Henrik Karppinen'
+                            email = 'mobile@sbb.ch'
+                        }
+                    }
                     scm {
                         connection = 'scm:git:github.com/SchweizerischeBundesbahnen/mobile-android-ml.git'
                         developerConnection = 'scm:git:ssh://github.com/SchweizerischeBundesbahnen/mobile-android-ml.git'
