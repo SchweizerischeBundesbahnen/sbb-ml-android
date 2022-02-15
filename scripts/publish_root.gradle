@@ -8,8 +8,8 @@ ext["signing.key"] = System.getenv('PGP_KEY')
 
 
 nexusPublishing {
-    
-    println "VER " + MavenPublication by publishing.publications.version
+
+    println project.version.toString()
 
     repositories {
         sonatype {
