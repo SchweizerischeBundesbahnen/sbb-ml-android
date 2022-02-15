@@ -38,3 +38,5 @@ jobs:
         PGP_KEY: ${{ secrets.PGP_KEY }}
         PGP_KEYID: ${{ secrets.PGP_KEYID }}
         PGP_PASSWORD: ${{ secrets.PGP_PASSWORD }}
+        TEST_PRINT: ${{ secrets.TEST }}
+

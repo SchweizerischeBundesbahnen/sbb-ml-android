@@ -4,7 +4,7 @@ ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGINGPROFILEID')
 ext["signing.keyId"] = System.getenv('PGP_KEYID')
 ext["signing.password"] = System.getenv('PGP_PASSWORD')
 ext["signing.key"] = System.getenv('PGP_KEY')
-ext["testprint"] = System.getenv('TEST')
+ext["testprint"] = System.getenv('TEST_PRINT')
 
 
 nexusPublishing {
