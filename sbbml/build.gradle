@@ -1,6 +1,5 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-
 apply from: '../version-code.gradle'
 
 ext {
@@ -10,7 +9,6 @@ ext {
 }
 
 apply from: "${rootProject.projectDir}/scripts/publish_module.gradle"
-
 
 android {
     compileSdkVersion 31

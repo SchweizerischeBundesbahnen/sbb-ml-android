@@ -1,14 +1,22 @@
+ext["ossrhUsername"] = System.getenv('SONATYPE_USERNAME')
+ext["ossrhPassword"] = System.getenv('SONATYPE_PASSWORD')
+ext["sonatypeStagingProfileId"] = System.getenv('SONATYPE_STAGINGPROFILEID')
+ext["signing.keyId"] = System.getenv('PGP_KEYID')
+ext["signing.password"] = System.getenv('PGP_PASSWORD')
+ext["signing.key"] = System.getenv('PGP_KEY')
+ext["testprint"] = System.getenv('TEST')
+
+
 nexusPublishing {
     repositories {
         sonatype {
-            stagingProfileId = System.getenv("SONATYPE_STAGINGPROFILEID")
+            stagingProfileId = sonatypeStagingProfileId
             nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
             snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            username = System.getenv("SONATYPE_USERNAME")
-            password = System.getenv("SONATYPE_PASSWORD")
+            username = ossrhUsername
+            password = ossrhPassword
         }
     }
 }
 
-String test = System.getenv("TEST")
-println "TEST PRINT " + test
+println "TEST PRINT " + testprint

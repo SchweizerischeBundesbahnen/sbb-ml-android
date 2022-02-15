@@ -62,15 +62,11 @@ afterEvaluate{
     }
 }
 
-
-String test = System.getenv("TEST")
-println "TEST PRINT2 " + test
-
 signing {
     useInMemoryPgpKeys(
-            System.getenv("PGP_KEYID"),
-            System.getenv("PGP_KEY"),
-            System.getenv("PGP_PASSWORD"),
+            rootProject.ext["signing.keyId"],
+            rootProject.ext["signing.key"],
+            rootProject.ext["signing.password"],
     )
     sign publishing.publications
 }
