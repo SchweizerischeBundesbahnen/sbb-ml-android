@@ -26,7 +26,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+
 import ch.sbb.mobile.ml.MLFragment;
+import ch.sbb.mobile.ml.MLView;
 import ch.sbb.mobile.ml.MLRecognition;
 import ch.sbb.mobile.ml.MLSettings;
 import ch.sbb.mobile.ml.demo.databinding.CameraViewBinding;
@@ -38,7 +40,7 @@ import timber.log.Timber;
   and draw them on the screen including a touch interface. The app includes several ML models
   in assets.
  */
-public class DemoActivity extends FragmentActivity implements MLFragment.DetectionListener {
+public class DemoActivity extends FragmentActivity implements MLView.DetectionListener {
 
   private List<String> processorStrings = Arrays.asList("CPU", "GPU", "NNAPI");
   private List<String> modelStrings = Arrays.asList("yolov5n", "yolov5s6");
