@@ -203,7 +203,7 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
   /**
    * Update the ML settings.
    * <p>
-   * Update may fail and the object detection does not start. In this case @see DetectionListener#runError()
+   * Update may fail and the object detection does not start. In this case @see {@link DetectionListener#runError(String)}
    *
    * @param mlSettings new settings.
    */

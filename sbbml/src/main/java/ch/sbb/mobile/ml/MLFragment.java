@@ -38,7 +38,7 @@ public class MLFragment extends Fragment {
   public static final String TAG = "MLFragment";
 
   private MLSettings mlSettings;
-  public MLView mlView;
+  private MLView mlView;
 
   @Override
   public void onAttach(@NonNull Context context) {
@@ -103,4 +103,15 @@ public class MLFragment extends Fragment {
         }
       }
   );
+
+  /**
+   * Update the ML settings.
+   * <p>
+   * Update may fail and the object detection does not start. In this case @see {@link ch.sbb.mobile.ml.MLView.DetectionListener#runError(String)}
+   *
+   * @param mlSettings new settings.
+   */
+  public void updateSettings(MLSettings mlSettings) {
+    mlView.updateSettings(mlSettings);
+  }
 }

@@ -269,7 +269,7 @@ public class DemoActivity extends FragmentActivity implements MLView.DetectionLi
     mlSettings.setUseTracker(binding.bottomSheet.trackerSwitch.isChecked());
 
     runError(""); // clear last error msg on ui
-    mlFragment.mlView.updateSettings(mlSettings);
+    mlFragment.updateSettings(mlSettings);
   }
 
   @Override
