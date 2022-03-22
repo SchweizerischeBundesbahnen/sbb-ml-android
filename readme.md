@@ -6,11 +6,11 @@ This library simplifies the integration of object detection models into Android 
 
 In addition to object detection there is also a object tracker algorithm. The tracker is a fast C++ optimised algorithm which is able to follow an object if the camera moves only slightly. The tracker smooths object detection results because object position is tracked several times while the object detection is done only once at the same time. It is possible to enable/disable the tracker in settings.
 
-This project also contains a sample app which demos how the library works. It has also several sample object detection models. A model is selected based on user chosen settings on App UI.
+This project also contains a sample app which demos how the library works. It has also several sample object detection models. A model is selected based on user chosen settings on App UI. The sample model detect typical objects inside a train wagon.
 
 ## Gradle
 
-implementation 'ch.sbb.mobile.ml:sbbml:1.0.2'
+implementation 'ch.sbb.mobile.ml:sbbml:1.0.3'
 
 Check the latest version at https://repo1.maven.org/maven2/ch/sbb/mobile/ml/sbbml/
  
@@ -28,13 +28,10 @@ It is best to test the demo app object detection performance in a real environme
 
 ## ML Models 
 
-The inference lib was developed to run Yolo ML models on Android in optimal way. The demo app contains several different size models. 
+The inference lib was developed to run Yolo ML models on Android in optimal way. The demo app contains several different size models so one can test performance. 
 
-### How to convert Yolo model to tflite with correct metadata
-
-The model metadata must be correctly set in order to run a Yolo model with this library. 
-
-TODO: The Yolo -> tflite converter will be published soon which will set the model metadata correctly. 
+See more about the models in SBB ML Models project: https://github.com/SchweizerischeBundesbahnen/sbb-ml-models
+You can create your own Yolo model with your data and there is a tool to convert it to the format suitable for this infrence library.
 
 ## Known issues
 
