@@ -82,6 +82,14 @@ class CameraPreview {
                     cd.close();
                     cameraDevice = null;
                 }
+
+                @Override
+                public void onClosed(final CameraDevice cd) {
+                    super.onClosed(cd);
+                    cameraOpenCloseLock.release();
+                    cd.close();
+                    cameraDevice = null;
+                }
             };
 
     private void createCameraPreviewSession(TextureView textureView, MLSettings mlSettings, ImageReader.OnImageAvailableListener imageListener) {

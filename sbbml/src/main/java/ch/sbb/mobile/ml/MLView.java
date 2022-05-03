@@ -309,17 +309,19 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
     canvasObjects.clear();
     CopyOnWriteArrayList<MultiBoxTracker.TrackedRecognition> unmutableCopyOfTrackedRecognitions = new CopyOnWriteArrayList(frameRecognitions);
     for (final MultiBoxTracker.TrackedRecognition recognition : unmutableCopyOfTrackedRecognitions) {
-      MLRecognition detectedObject;
-      if (recognition.getTrackedObject() != null) {
-        detectedObject = new MLRecognition(recognition.getTitle(), recognition.getDetectionConfidence(), recognition.getTrackedObject().getTrackedPositionInPreviewFrame());
-      } else {
-        detectedObject = new MLRecognition(recognition.getTitle(), recognition.getDetectionConfidence(), recognition.getLocation());
-      }
+      if(recognition != null) {
+        MLRecognition detectedObject;
+        if (recognition.getTrackedObject() != null) {
+          detectedObject = new MLRecognition(recognition.getTitle(), recognition.getDetectionConfidence(), recognition.getTrackedObject().getTrackedPositionInPreviewFrame());
+        } else {
+          detectedObject = new MLRecognition(recognition.getTitle(), recognition.getDetectionConfidence(), recognition.getLocation());
+        }
 
-      final RectF trackedPos = new RectF(detectedObject.getLocation());
-      frameToCanvasMatrix.mapRect(trackedPos);
-      detectedObject.setLocation(trackedPos);
-      canvasObjects.add(detectedObject);
+        final RectF trackedPos = new RectF(detectedObject.getLocation());
+        frameToCanvasMatrix.mapRect(trackedPos);
+        detectedObject.setLocation(trackedPos);
+        canvasObjects.add(detectedObject);
+      }
     }
   }
 
