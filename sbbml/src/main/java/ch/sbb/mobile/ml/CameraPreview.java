@@ -136,7 +136,7 @@ class CameraPreview {
                         }
                     },
                     null);
-        } catch (final CameraAccessException e) {
+        } catch (final CameraAccessException | IllegalArgumentException e) {
             Timber.e(e);
         }
     }

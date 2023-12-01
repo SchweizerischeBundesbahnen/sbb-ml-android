@@ -2,13 +2,12 @@ apply plugin: 'com.android.application'
 apply from: '../version-code.gradle'
 
 android {
-    compileSdkVersion 31
-    buildToolsVersion '30.0.3'
+    compileSdk 34
 
     defaultConfig {
         applicationId "ch.sbb.mobile.ml.demo"
         minSdkVersion 25
-        targetSdkVersion 31
+        targetSdkVersion 34
         versionCode generateVersionCode()
         versionName PUBLISH_VERSION
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -16,6 +15,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 
     buildTypes {
@@ -24,21 +24,22 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    aaptOptions {
-        noCompress "tflite"
-    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
-    }
-    lintOptions {
-        abortOnError false
     }
     flavorDimensions "tfliteInference"
     productFlavors {
        interpreter {
            dimension "tfliteInference"
        }
+    }
+    namespace 'ch.sbb.mobile.ml.demo'
+    androidResources {
+        noCompress 'tflite'
+    }
+    lint {
+        abortOnError false
     }
 
     applicationVariants.all { variant ->
