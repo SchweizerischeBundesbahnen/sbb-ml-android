@@ -10,7 +10,7 @@ This project also contains a sample app which demos how the library works. It ha
 
 ## Gradle
 
-implementation 'ch.sbb.mobile.ml:sbbml:1.0.3'
+implementation 'ch.sbb.mobile.ml:sbbml:1.0.5'
 
 Check the latest version at https://repo1.maven.org/maven2/ch/sbb/mobile/ml/sbbml/
  
