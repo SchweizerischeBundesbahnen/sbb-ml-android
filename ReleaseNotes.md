@@ -1,5 +1,10 @@
 # Release Notes SBBML for Android
 
+## V1.0.6 - 12 Sep 2025
+### Features
+* Upgrade to AGP 8.12.0, JDK 21 and Android SDK 36
+* Support 16KB alignment
+
 ## V1.0.5 - 1 Dec 2023
 ### Bugfix
 * Fix crash when using this Library with Flutter on Android 14
