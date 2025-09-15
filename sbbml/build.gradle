@@ -66,6 +66,13 @@ android {
         jvmTarget = "21"
     }
     namespace 'ch.sbb.mobile.ml'
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 // see http://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html

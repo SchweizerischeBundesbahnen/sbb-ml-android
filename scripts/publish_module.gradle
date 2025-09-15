@@ -35,9 +35,6 @@ afterEvaluate{
 
                 from components.release
 
-                artifact androidSourcesJar
-                artifact androidJavadocsJar
-
                 pom {
                     name = 'sbbml'
                     description = 'SBB ML Library'
@@ -65,14 +62,14 @@ afterEvaluate{
     }
 }
 
-signing {
-    useInMemoryPgpKeys(
-            rootProject.ext["signing.keyId"],
-            rootProject.ext["signing.key"],
-            rootProject.ext["signing.password"],
-    )
-    sign publishing.publications
-}
+//signing {
+//    useInMemoryPgpKeys(
+//            rootProject.ext["signing.keyId"],
+//            rootProject.ext["signing.key"],
+//            rootProject.ext["signing.password"],
+//    )
+//    sign publishing.publications
+//}
 
 dependencies {
     dokkaHtmlPlugin "org.jetbrains.dokka:kotlin-as-java-plugin:$dokka_version"

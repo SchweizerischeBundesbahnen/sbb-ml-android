@@ -1,46 +1,46 @@
-name: Publish package to the Maven Central Repository
-
-# guide: https://proandroiddev.com/publishing-android-libraries-to-mavencentral-in-2021-8ac9975c3e52
-
-# release is triggered when the release is created and published on github.
-on:
-  release:
-    types: [published]
-
-# this could be used to create snapshot releases but for some reason they are not correctly deployed at the moment to the snapshot repo.
-#  push:
-#    branches: [main]
-jobs:
-  publish:
-    name: Release build and publish
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: set up JDK 21
-      uses: actions/setup-java@v2
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    # Builds the release artifacts of the library
-    - name: Release build
-      run: ./gradlew sbbml:assembleRelease
-
-    # Generates other artifacts 
-    - name: Source jar and dokka
-      run: ./gradlew androidSourcesJar androidJavadocJar
-
-    # Runs upload, and then closes & releases the repository
-    - name: Publish to MavenCentral
-      run: ./gradlew sbbml:publishReleasePublicationToSonatypeRepository --stacktrace # use this cmd to avoid nexus release approve in nexus repo manager : --max-workers 1 closeAndReleaseSonatypeStagingRepository
-      env:
-        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-        SONATYPE_STAGINGPROFILEID: ${{ secrets.SONATYPE_STAGINGPROFILEID }}
-        PGP_KEY: ${{ secrets.PGP_KEY }}
-        PGP_KEYID: ${{ secrets.PGP_KEYID }}
-        PGP_PASSWORD: ${{ secrets.PGP_PASSWORD }}
-
+#name: Publish package to the Maven Central Repository
+#
+## guide: https://proandroiddev.com/publishing-android-libraries-to-mavencentral-in-2021-8ac9975c3e52
+#
+## release is triggered when the release is created and published on github.
+#on:
+#  release:
+#    types: [published]
+#
+## this could be used to create snapshot releases but for some reason they are not correctly deployed at the moment to the snapshot repo.
+##  push:
+##    branches: [main]
+#jobs:
+#  publish:
+#    name: Release build and publish
+#    runs-on: ubuntu-latest
+#    steps:
+#    - uses: actions/checkout@v2
+#    - name: set up JDK 21
+#      uses: actions/setup-java@v2
+#      with:
+#        java-version: '21'
+#        distribution: 'temurin'
+#
+#    - name: Grant execute permission for gradlew
+#      run: chmod +x gradlew
+#
+#    # Builds the release artifacts of the library
+#    - name: Release build
+#      run: ./gradlew sbbml:assembleRelease
+#
+#    # Generates other artifacts
+#    - name: Source jar and dokka
+#      run: ./gradlew androidSourcesJar androidJavadocJar
+#
+#    # Runs upload, and then closes & releases the repository
+#    - name: Publish to MavenCentral
+#      run: ./gradlew sbbml:publishReleasePublicationToSonatypeRepository --stacktrace # use this cmd to avoid nexus release approve in nexus repo manager : --max-workers 1 closeAndReleaseSonatypeStagingRepository
+#      env:
+#        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+#        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+#        SONATYPE_STAGINGPROFILEID: ${{ secrets.SONATYPE_STAGINGPROFILEID }}
+#        PGP_KEY: ${{ secrets.PGP_KEY }}
+#        PGP_KEYID: ${{ secrets.PGP_KEYID }}
+#        PGP_PASSWORD: ${{ secrets.PGP_PASSWORD }}
+#
