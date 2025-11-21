@@ -8,8 +8,6 @@ ext {
     PUBLISH_ARTIFACT_ID = 'sbbml'
 }
 
-apply from: "${rootProject.projectDir}/scripts/publish_module.gradle"
-
 println "VER" + PUBLISH_VERSION
 
 android {
