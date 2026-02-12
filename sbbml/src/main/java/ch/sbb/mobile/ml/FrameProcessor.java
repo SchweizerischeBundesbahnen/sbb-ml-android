@@ -56,6 +56,7 @@ class FrameProcessor {
         YuvLayer(int value) { this.value = value; }
     }
 
+    public static final int THREAD_COUNT = 2;
     public static final int BUFFER_COUNT = 2;
     private byte[][] yuvBytesBuffer;
     private int[] rgbBytes;
@@ -77,7 +78,7 @@ class FrameProcessor {
     public FrameProcessor(Context context, MLSettings mlSettings, int sensorOrientation, FrameProcessorListener frameProcessorListener) throws IOException {
         this.mlSettings = mlSettings;
         this.frameProcessorListener = frameProcessorListener;
-        executorService = Executors.newFixedThreadPool(2);
+        executorService = Executors.newFixedThreadPool(THREAD_COUNT);
         rgbFrameBitmap = Bitmap.createBitmap(mlSettings.getPreviewSize().getWidth(), mlSettings.getPreviewSize().getHeight(), Bitmap.Config.ARGB_8888);
         rgbBytes = new int[mlSettings.getPreviewSize().getWidth() * mlSettings.getPreviewSize().getHeight()];
         scaledBitmap = Bitmap.createBitmap(mlSettings.getModelInputSize(), mlSettings.getModelInputSize(), Bitmap.Config.ARGB_8888);
@@ -143,14 +144,10 @@ class FrameProcessor {
 
             // run object detector on this frame
             isDetectingFrame.set(true);
-            //try {
-                Timber.i("Executing detection inside : %s", Thread.currentThread().getName());
-                yuv2RGB(yRowStride, uvRowStride, uvPixelStride, yuvBytesBuffer, bufferPointer);
-                scale();
-                detectObjects(yuvBytesBuffer[bufferPointer + YuvLayer.LAYER_Y.value], timestamp);
-            //} catch(Exception e) {
-            //    Timber.e("Buffer overflow. This may happen if input image size is changed on the fly. Just skip this frame.");
-            //}
+            Timber.i("Executing detection inside : %s", Thread.currentThread().getName());
+            yuv2RGB(yRowStride, uvRowStride, uvPixelStride, yuvBytesBuffer, bufferPointer);
+            scale();
+            detectObjects(yuvBytesBuffer[bufferPointer + YuvLayer.LAYER_Y.value], timestamp);
             isDetectingFrame.set(false);
 
             // closing the image will enable us the get next image in onImageAvailable() and we also free a buffer to read it.

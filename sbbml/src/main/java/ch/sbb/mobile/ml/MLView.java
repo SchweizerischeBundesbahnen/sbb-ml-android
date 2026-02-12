@@ -334,11 +334,13 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
       if (bufferIndex >= 0) {
         final Image image = reader.acquireLatestImage();
         if (image != null) {
-          frameProcessor.processImage(image, bufferIndex);
-          image.close();
+            frameProcessor.processImage(image, bufferIndex);
+            image.close();
         } else {
-          frameProcessor.freeBufferByIndex(bufferIndex);
+            frameProcessor.freeBufferByIndex(bufferIndex);
         }
+      } else {
+          Timber.i("Buffer full");
       }
     }
   }
