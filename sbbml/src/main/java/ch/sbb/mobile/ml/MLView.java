@@ -272,6 +272,7 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
       return;
     }
     final int rotation = ((Activity) getContext()).getWindowManager().getDefaultDisplay().getRotation();
+    Timber.i("Lib Rotation: %s", rotation);
     final Matrix matrix = new Matrix();
     final RectF viewRect = new RectF(0, 0, viewWidth, viewHeight);
     final RectF bufferRect = new RectF(0, 0, mlSettings.getPreviewSize().getHeight(), mlSettings.getPreviewSize().getWidth());
@@ -329,13 +330,14 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
   public void onImageAvailable(final ImageReader reader) {
     if (state.equals(STATE.RUNNING)) {
       // check if there is a free buffer available before getting the image.
-      int bufferIndex = frameProcessor.reserveBuffer();
+      int bufferIndex = frameProcessor.getFreeBufferIndex();
       if (bufferIndex >= 0) {
         final Image image = reader.acquireLatestImage();
         if (image != null) {
           frameProcessor.processImage(image, bufferIndex);
+          image.close();
         } else {
-          frameProcessor.freeBuffer(bufferIndex);
+          frameProcessor.freeBufferByIndex(bufferIndex);
         }
       }
     }

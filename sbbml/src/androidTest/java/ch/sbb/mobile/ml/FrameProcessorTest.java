@@ -42,16 +42,16 @@ public class FrameProcessorTest  {
             }
         });
 
-        int index0 = frameProcessor.reserveBuffer();
-        int index1 = frameProcessor.reserveBuffer();
-        int index2 = frameProcessor.reserveBuffer();
+        int index0 = frameProcessor.getFreeBufferIndex();
+        int index1 = frameProcessor.getFreeBufferIndex();
+        int index2 = frameProcessor.getFreeBufferIndex();
 
         assertThat(index0).isEqualTo(0);
         assertThat(index1).isEqualTo(1);
         assertThat(index2).isEqualTo(-1);
 
-        frameProcessor.freeBuffer(1);
-        int index3 = frameProcessor.reserveBuffer();
+        frameProcessor.freeBufferByIndex(1);
+        int index3 = frameProcessor.getFreeBufferIndex();
         assertThat(index3).isEqualTo(1);
     }
 }

@@ -13,7 +13,6 @@ import android.os.SystemClock;
 import android.util.Size;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -55,7 +54,6 @@ class FrameProcessor {
 
         public final int value;
         YuvLayer(int value) { this.value = value; }
-        //public int getValue() { return value; }
     }
 
     public static final int BUFFER_COUNT = 2;
@@ -68,8 +66,7 @@ class FrameProcessor {
     private MultiBoxTracker multiBoxTracker;
     private long timestamp = 0;
     private long lastProcessingTimeMs;
-    private final AtomicBoolean isBuffer0Free = new AtomicBoolean(true);
-    private final AtomicBoolean isBuffer1Free = new AtomicBoolean(true);
+    private final AtomicBoolean[] isBufferFree = new AtomicBoolean[BUFFER_COUNT];
     private final AtomicBoolean isDetectingFrame = new AtomicBoolean(false);
     private final List<MultiBoxTracker.TrackedRecognition> frameRecognitions = new ArrayList<>();
     private Bitmap scaledBitmap;
@@ -94,6 +91,11 @@ class FrameProcessor {
         detector = new TFLiteObjectDetector(context, mlSettings);
         multiBoxTracker = new MultiBoxTracker();
         timestamp = 0;
+
+        for(int bufferIndex = 0; bufferIndex < BUFFER_COUNT; bufferIndex++)
+        {
+            isBufferFree[bufferIndex] = new AtomicBoolean(true);
+        }
     }
 
     public void processImage(Image image, int bufferIndex) {
@@ -135,7 +137,7 @@ class FrameProcessor {
 
             if(isDetectingFrame.get()) {
                 // the detector is already busy, free the buffer and return.
-                freeBuffer(bufferIndex);
+                freeBufferByIndex(bufferIndex);
                 return;
             }
 
@@ -152,7 +154,7 @@ class FrameProcessor {
             isDetectingFrame.set(false);
 
             // closing the image will enable us the get next image in onImageAvailable() and we also free a buffer to read it.
-            freeBuffer(bufferIndex);
+            freeBufferByIndex(bufferIndex);
         };
         executorService.execute(task);
     }
@@ -269,27 +271,24 @@ class FrameProcessor {
                 false);
   }
 
-    int reserveBuffer() {
-        if(isBuffer0Free.get()) {
-            Timber.i("reserveBuffer 0");
-            isBuffer0Free.set(false);
-            return 0;
-        } else if(isBuffer1Free.get()) {
-            Timber.i("reserveBuffer 1");
-            isBuffer1Free.set(false);
-            return 1;
-        } else {
-            return -1;
+    int getFreeBufferIndex()
+    {
+        for(int bufferIndex = 0; bufferIndex < BUFFER_COUNT; bufferIndex++)
+        {
+            if(isBufferFree[bufferIndex].get())
+            {
+                Timber.i("Buffer Index %d reserved", bufferIndex);
+                isBufferFree[bufferIndex].set(false);
+                return bufferIndex;
+            }
         }
+        Timber.i("No free buffer could be found");
+        return -1;
     }
 
-    void freeBuffer(int index) {
+    void freeBufferByIndex(int index) {
         // this will just mark buffer as free
         Timber.i("Free buffer %d", index);
-        if(index == 0) {
-            isBuffer0Free.set(true);
-        } else if(index == 1) {
-            isBuffer1Free.set(true);
-        }
+        isBufferFree[index].set(true);
     }
 }
