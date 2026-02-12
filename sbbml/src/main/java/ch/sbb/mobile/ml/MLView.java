@@ -4,6 +4,7 @@
 package ch.sbb.mobile.ml;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -32,7 +33,7 @@ import java.util.concurrent.Semaphore;
 import timber.log.Timber;
 
 /**
- * Use @see {@link MLView} if you don't have a @see {@link android.app.FragmentManager} to manage the lifecycle.
+ * Use @see {@link MLView} if you don't have a @see {@link FragmentManager} to manage the lifecycle.
  * For starting use @see {@link MLView#onAttach(DetectionListener, MLSettings)} and @see {@link MLView#startDetection()}.
  * For stopping use @see {@link MLView#onStop()} and @see {@link MLView#onDetach()}.
  */
@@ -52,11 +53,6 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
     initView();
   }
 
-  public MLView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-    super(context, attrs, defStyleAttr, defStyleRes);
-    initView();
-  }
-
   private void initView() {
     final View view = inflate(getContext(), R.layout.camera_fragment, this);
     textureView = view.findViewById(R.id.texture);
@@ -68,21 +64,19 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
     /**
      * Used preview size.
      *
-     * @param inputSize
+     * @param inputSize desired size of the preview image
      */
     void previewSize(Size inputSize);
 
     /**
      * Used input size.
      *
-     * @param inputSize
+     * @param inputSize size of the final image
      */
     void inputSize(Size inputSize);
 
     /**
-     * Latest object detection inference time. This does not include tracker.
-     *
-     * @param inferenceTime
+     * @param inferenceTime Latest object detection inference time in ms. This does not include tracker.
      */
     void inferenceTime(int inferenceTime);
 
@@ -100,12 +94,10 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
      * User denied to give camera access asked by the library.
      * You can also ask the permission on app side to have more control of this.
      */
-    void permissonDenied();
+    void permissionDenied();
 
     /**
-     * Any error which prevents the object detection to run.
-     *
-     * @param errorMsg
+     * @param errorMsg Any error which prevents the object detection to run.
      */
     void runError(String errorMsg);
   }
@@ -113,7 +105,6 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
   private enum STATE {STOPPED, RUNNING, INITIALIZING}
 
   private STATE state = STATE.STOPPED;
-  public static final String TAG = "MLView";
   private DetectionListener detectionListener;
   private MLSettings mlSettings;
   private AutoFitTextureView textureView;
@@ -128,24 +119,24 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
   private final TextureView.SurfaceTextureListener surfaceTextureListener =
       new TextureView.SurfaceTextureListener() {
         @Override
-        public void onSurfaceTextureAvailable(final SurfaceTexture texture, final int width, final int height) {
+        public void onSurfaceTextureAvailable(@NonNull final SurfaceTexture texture, final int width, final int height) {
           Timber.i("onSurfaceTextureAvailable");
           initialize();
         }
 
         @Override
-        public void onSurfaceTextureSizeChanged(final SurfaceTexture texture, final int width, final int height) {
+        public void onSurfaceTextureSizeChanged(@NonNull final SurfaceTexture texture, final int width, final int height) {
           Timber.i("onSurfaceTextureSizeChanged");
           initialize();
         }
 
         @Override
-        public boolean onSurfaceTextureDestroyed(final SurfaceTexture texture) {
+        public boolean onSurfaceTextureDestroyed(@NonNull final SurfaceTexture texture) {
           return true;
         }
 
         @Override
-        public void onSurfaceTextureUpdated(final SurfaceTexture texture) {
+        public void onSurfaceTextureUpdated(@NonNull final SurfaceTexture texture) {
         }
       };
 
@@ -243,7 +234,7 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
     try {
       frameProcessor = new FrameProcessor(getContext(), mlSettings, sensorOrientation, this);
     } catch (final IOException e) {
-      String errorMsg = "model init failed: " + e.toString();
+      String errorMsg = "model init failed: " + e;
       Timber.e(errorMsg);
       detectionListener.runError(errorMsg);
       state = STATE.STOPPED;
@@ -272,6 +263,7 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
       return;
     }
     final int rotation = ((Activity) getContext()).getWindowManager().getDefaultDisplay().getRotation();
+    Timber.i("Lib Rotation: %s", rotation);
     final Matrix matrix = new Matrix();
     final RectF viewRect = new RectF(0, 0, viewWidth, viewHeight);
     final RectF bufferRect = new RectF(0, 0, mlSettings.getPreviewSize().getHeight(), mlSettings.getPreviewSize().getWidth());
@@ -307,7 +299,7 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
         false);
 
     canvasObjects.clear();
-    CopyOnWriteArrayList<MultiBoxTracker.TrackedRecognition> unmutableCopyOfTrackedRecognitions = new CopyOnWriteArrayList(frameRecognitions);
+    CopyOnWriteArrayList<MultiBoxTracker.TrackedRecognition> unmutableCopyOfTrackedRecognitions = new CopyOnWriteArrayList<>(frameRecognitions);
     for (final MultiBoxTracker.TrackedRecognition recognition : unmutableCopyOfTrackedRecognitions) {
       if(recognition != null) {
         MLRecognition detectedObject;
@@ -329,14 +321,17 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
   public void onImageAvailable(final ImageReader reader) {
     if (state.equals(STATE.RUNNING)) {
       // check if there is a free buffer available before getting the image.
-      int bufferIndex = frameProcessor.reserveBuffer();
+      int bufferIndex = frameProcessor.getFreeBufferIndex();
       if (bufferIndex >= 0) {
         final Image image = reader.acquireLatestImage();
         if (image != null) {
-          frameProcessor.processImage(image, bufferIndex);
+            frameProcessor.processImage(image, bufferIndex);
+            image.close();
         } else {
-          frameProcessor.freeBuffer(bufferIndex);
+            frameProcessor.freeBufferByIndex(bufferIndex);
         }
+      } else {
+          Timber.i("Buffer full");
       }
     }
   }
@@ -362,17 +357,15 @@ public class MLView extends FrameLayout implements OnImageAvailableListener, Fra
 
   private int getScreenOrientation() {
     Timber.i("getScreenOrientation");
-    switch (((Activity) getContext()).getWindowManager().getDefaultDisplay().getRotation()) {
-      case Surface.ROTATION_270:
-        return 270;
-      case Surface.ROTATION_180:
-        return 180;
-      case Surface.ROTATION_90:
-        return 90;
-      case Surface.ROTATION_0:
-      default:
-        return 0;
-    }
+    final int surface = ((Activity) getContext()).getWindowManager().getDefaultDisplay().getRotation();
+      return switch (surface)
+      {
+          case Surface.ROTATION_0 -> 0;
+          case Surface.ROTATION_90 -> 90;
+          case Surface.ROTATION_180 -> 180;
+          case Surface.ROTATION_270 -> 270;
+          default -> throw new IllegalStateException("Unexpected rotation: " + surface);
+      };
   }
 
   @Override

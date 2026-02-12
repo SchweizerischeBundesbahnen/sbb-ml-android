@@ -18,6 +18,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import java.util.Objects;
+
 import timber.log.Timber;
 
 public class MLFragment extends Fragment {
@@ -37,7 +39,7 @@ public class MLFragment extends Fragment {
 
   public static final String TAG = "MLFragment";
 
-  private MLSettings mlSettings;
+  private final MLSettings mlSettings;
   private MLView mlView;
 
   @Override
@@ -47,7 +49,7 @@ public class MLFragment extends Fragment {
       mlView = new MLView(context);
       mlView.onAttach((MLView.DetectionListener) context, mlSettings);
     } else {
-      throw new ClassCastException(context.toString() + " must implemenet DetectionListener");
+      throw new ClassCastException(context + " must implement DetectionListener");
     }
   }
 
@@ -59,7 +61,7 @@ public class MLFragment extends Fragment {
   }
 
   @Override
-  public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
+  public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
     return mlView.getRootView();
   }
 
@@ -81,27 +83,27 @@ public class MLFragment extends Fragment {
   }
 
   private boolean hasCameraPermission() {
-    return ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+    return ActivityCompat.checkSelfPermission(Objects.requireNonNull(getContext()), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
   }
 
   private void requestPermission() {
     mPermissionResult.launch(Manifest.permission.CAMERA);
   }
 
-  private ActivityResultLauncher<String> mPermissionResult = registerForActivityResult(
+  private final ActivityResultLauncher<String> mPermissionResult = registerForActivityResult(
       new ActivityResultContracts.RequestPermission(),
-      new ActivityResultCallback<Boolean>() {
-        @Override
-        public void onActivityResult(Boolean result) {
-          if (result) {
-            mlView.startDetection();
-            Timber.i("onActivityResult: PERMISSION GRANTED");
-          } else {
-            ((MLView.DetectionListener) getContext()).permissonDenied();
-            Timber.i("onActivityResult: PERMISSION DENIED");
+          new ActivityResultCallback<>() {
+              @Override
+              public void onActivityResult(Boolean result) {
+                  if (result) {
+                      mlView.startDetection();
+                      Timber.i("onActivityResult: PERMISSION GRANTED");
+                  } else {
+                      ((MLView.DetectionListener) Objects.requireNonNull(getContext())).permissionDenied();
+                      Timber.i("onActivityResult: PERMISSION DENIED");
+                  }
+              }
           }
-        }
-      }
   );
 
   /**

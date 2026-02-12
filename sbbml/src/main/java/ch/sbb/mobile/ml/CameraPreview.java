@@ -23,8 +23,11 @@ import android.os.HandlerThread;
 import android.util.Size;
 import android.view.Surface;
 import android.view.TextureView;
+
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import timber.log.Timber;
@@ -47,23 +50,23 @@ class CameraPreview {
             new CameraCaptureSession.CaptureCallback() {
                 @Override
                 public void onCaptureProgressed(
-                        final CameraCaptureSession session,
-                        final CaptureRequest request,
-                        final CaptureResult partialResult) {
+                        @NonNull final CameraCaptureSession session,
+                        @NonNull final CaptureRequest request,
+                        @NonNull final CaptureResult partialResult) {
                 }
 
                 @Override
                 public void onCaptureCompleted(
-                        final CameraCaptureSession session,
-                        final CaptureRequest request,
-                        final TotalCaptureResult result) {
+                        @NonNull final CameraCaptureSession session,
+                        @NonNull final CaptureRequest request,
+                        @NonNull final TotalCaptureResult result) {
                 }
             };
 
     private final CameraDevice.StateCallback stateCallback =
             new CameraDevice.StateCallback() {
                 @Override
-                public void onOpened(final CameraDevice cd) {
+                public void onOpened(@NonNull final CameraDevice cd) {
                     cameraOpenCloseLock.release();
                     cameraDevice = cd;
                     createCameraPreviewSession(textureView, mlSettings, imageAvailableListener);
@@ -84,7 +87,7 @@ class CameraPreview {
                 }
 
                 @Override
-                public void onClosed(final CameraDevice cd) {
+                public void onClosed(@NonNull final CameraDevice cd) {
                     super.onClosed(cd);
                     cameraOpenCloseLock.release();
                     cd.close();
@@ -96,7 +99,7 @@ class CameraPreview {
         Timber.i("createCameraPreviewSession");
         try {
             final SurfaceTexture texture = textureView.getSurfaceTexture();
-            texture.setDefaultBufferSize(mlSettings.getPreviewSize().getWidth(), mlSettings.getPreviewSize().getHeight());
+            Objects.requireNonNull(texture).setDefaultBufferSize(mlSettings.getPreviewSize().getWidth(), mlSettings.getPreviewSize().getHeight());
             final Surface surface = new Surface(texture);
             previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             previewRequestBuilder.addTarget(surface);
@@ -110,7 +113,7 @@ class CameraPreview {
                     new CameraCaptureSession.StateCallback() {
 
                         @Override
-                        public void onConfigured(final CameraCaptureSession cameraCaptureSession) {
+                        public void onConfigured(@NonNull final CameraCaptureSession cameraCaptureSession) {
                             if (null == cameraDevice) {
                                 return;
                             }
@@ -131,7 +134,7 @@ class CameraPreview {
                         }
 
                         @Override
-                        public void onConfigureFailed(final CameraCaptureSession cameraCaptureSession) {
+                        public void onConfigureFailed(@NonNull final CameraCaptureSession cameraCaptureSession) {
                             Timber.e("Camera config failed");
                         }
                     },
@@ -165,24 +168,25 @@ class CameraPreview {
     }
 
     int getCameraOrientation(Context context) {
-        String cameraId = chooseCamera(context);
         final CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
-        try {
+        try
+        {
+            String cameraId = Objects.requireNonNull(chooseCamera(context));
             final CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
-            return characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-        } catch (final Exception e) {
-            Timber.e(e);
-            return 0;
+            final Integer cameraOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
+            return Objects.requireNonNull(cameraOrientation);
+            } catch (CameraAccessException e) {
+                throw new RuntimeException(e);
         }
     }
 
     Size[] getCameraOutputSizes(Context context) {
-        String cameraId = chooseCamera(context);
         final CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
         try {
+            String cameraId = Objects.requireNonNull(chooseCamera(context));
             final CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
             final StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-            return map.getOutputSizes(SurfaceTexture.class);
+            return Objects.requireNonNull(map).getOutputSizes(SurfaceTexture.class);
         } catch (final Exception e) {
             Timber.e(e);
             return new Size[0];
@@ -195,7 +199,6 @@ class CameraPreview {
         this.textureView = textureView;
         this.mlSettings = mlSettings;
 
-        String cameraId = chooseCamera(context);
         startCameraThread();
         final CameraManager manager = (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
         try {
@@ -205,6 +208,7 @@ class CameraPreview {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
+            String cameraId = Objects.requireNonNull(chooseCamera(context));
             manager.openCamera(cameraId, stateCallback, cameraHandler);
         } catch (final CameraAccessException e) {
             Timber.e(e);
