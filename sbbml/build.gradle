@@ -4,7 +4,6 @@ apply from: '../version-code.gradle'
 
 ext {
     PUBLISH_GROUP_ID = 'ch.sbb.mobile.ml'
-    PUBLISH_VERSION = PUBLISH_VERSION
     PUBLISH_ARTIFACT_ID = 'sbbml'
 }
 
@@ -52,9 +51,6 @@ android {
         }
     }
 
-    kotlinOptions {
-        jvmTarget = "21"
-    }
     namespace 'ch.sbb.mobile.ml'
 
     publishing {
@@ -75,8 +71,10 @@ android {
 // see http://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html
 if (JavaVersion.current().isJava8Compatible()) {
     allprojects {
-        tasks.withType(Javadoc) {
-            options.addStringOption('Xdoclint:none', '-quiet')
+        tasks.withType(Javadoc).tap {
+            configureEach {
+                options.addStringOption('Xdoclint:none', '-quiet')
+            }
         }
     }
 }

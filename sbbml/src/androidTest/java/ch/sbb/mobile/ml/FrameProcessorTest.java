@@ -13,7 +13,6 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class FrameProcessorTest  {
 
-    private FrameProcessor frameProcessor;
     private MLSettings mlSettings;
 
     @Before
@@ -24,8 +23,7 @@ public class FrameProcessorTest  {
 
     @Test
     public void canReserver2Buffers() throws Exception {
-
-        frameProcessor = new FrameProcessor(getApplicationContext(), mlSettings, 0, new FrameProcessor.FrameProcessorListener() {
+        FrameProcessor frameProcessor = new FrameProcessor(getApplicationContext(), mlSettings, 0, new FrameProcessor.FrameProcessorListener() {
             @Override
             public void foundObjects(List<MultiBoxTracker.TrackedRecognition> objectList) {
 

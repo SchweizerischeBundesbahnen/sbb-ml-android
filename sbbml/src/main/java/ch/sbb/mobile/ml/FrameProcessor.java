@@ -59,21 +59,21 @@ class FrameProcessor {
     public static final int THREAD_COUNT = 2;
     public static final int BUFFER_COUNT = 2;
     private byte[][] yuvBytesBuffer;
-    private int[] rgbBytes;
-    private ExecutorService executorService;
-    private MLSettings mlSettings;
-    private Bitmap rgbFrameBitmap;
-    private TFLiteObjectDetector detector;
-    private MultiBoxTracker multiBoxTracker;
-    private long timestamp = 0;
+    private final int[] rgbBytes;
+    private final ExecutorService executorService;
+    private final MLSettings mlSettings;
+    private final Bitmap rgbFrameBitmap;
+    private final TFLiteObjectDetector detector;
+    private final MultiBoxTracker multiBoxTracker;
+    private long timestamp;
     private long lastProcessingTimeMs;
     private final AtomicBoolean[] isBufferFree = new AtomicBoolean[BUFFER_COUNT];
     private final AtomicBoolean isDetectingFrame = new AtomicBoolean(false);
     private final List<MultiBoxTracker.TrackedRecognition> frameRecognitions = new ArrayList<>();
-    private Bitmap scaledBitmap;
-    private Matrix frameToScaledTransform;
-    private Matrix scaledToFrameTransform;
-    private FrameProcessorListener frameProcessorListener;
+    private final Bitmap scaledBitmap;
+    private final Matrix frameToScaledTransform;
+    private final Matrix scaledToFrameTransform;
+    private final FrameProcessorListener frameProcessorListener;
 
     public FrameProcessor(Context context, MLSettings mlSettings, int sensorOrientation, FrameProcessorListener frameProcessorListener) throws IOException {
         this.mlSettings = mlSettings;
@@ -170,7 +170,7 @@ class FrameProcessor {
 
     private synchronized void publishTrackerResults() {
         frameRecognitions.clear();
-        CopyOnWriteArrayList<MultiBoxTracker.TrackedRecognition> unmutableCopyOfTrackedRecognitions = new CopyOnWriteArrayList(multiBoxTracker.publish());
+        CopyOnWriteArrayList<MultiBoxTracker.TrackedRecognition> unmutableCopyOfTrackedRecognitions = new CopyOnWriteArrayList<>(multiBoxTracker.publish());
         for (final MultiBoxTracker.TrackedRecognition result : unmutableCopyOfTrackedRecognitions) {
             if ((result != null) && (result.getTrackedObject() != null) && (result.getTrackedObject().isValid())) {
                 frameRecognitions.add(result);
@@ -183,11 +183,11 @@ class FrameProcessor {
     private void detectObjects(byte[] luminance, long lastTimestamp) {
         Timber.i("detectObjects");
         final long startTime = SystemClock.uptimeMillis();
-        List<MLRecognition> results = new ArrayList<>();
+        List<MLRecognition> results;
         try {
             results = detector.recognizeImage(scaledBitmap);
         } catch (IOException e) {
-            frameProcessorListener.error("Object detection failed:" + e.toString());
+            frameProcessorListener.error("Object detection failed:" + e);
             return;
         }
 
