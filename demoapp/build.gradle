@@ -23,15 +23,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    aaptOptions {
-        noCompress "tflite"
-    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_21
         targetCompatibility JavaVersion.VERSION_21
-    }
-    lintOptions {
-        abortOnError false
     }
     flavorDimensions "tfliteInference"
     productFlavors {
@@ -40,6 +34,12 @@ android {
        }
     }
     namespace 'ch.sbb.mobile.ml.demo'
+    androidResources {
+        noCompress 'tflite'
+    }
+    lint {
+        abortOnError false
+    }
 
     applicationVariants.all { variant ->
         variant.outputs.each { output ->

@@ -12,7 +12,7 @@ public class ImageUtilsTest  {
     @Test
     public void transformation1() {
         Matrix transformationMatrix = ImageUtils.getTransformationMatrix(100,200,200,400, 0, true);
-        float f[] = {2.0f, 0.0f, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+        float[] f = {2.0f, 0.0f, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f, 0.0f, 1.0f};
         Matrix matrix = new Matrix();
         matrix.setValues(f);
         assertThat(transformationMatrix).isEqualTo(matrix);
@@ -21,7 +21,7 @@ public class ImageUtilsTest  {
     @Test
     public void transformation2() {
         Matrix transformationMatrix = ImageUtils.getTransformationMatrix(100,200,200,400, 0, false);
-        float f[] = {2.0f, 0.0f, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+        float[] f = {2.0f, 0.0f, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f, 0.0f, 1.0f};
         Matrix matrix = new Matrix();
         matrix.setValues(f);
         assertThat(transformationMatrix).isEqualTo(matrix);

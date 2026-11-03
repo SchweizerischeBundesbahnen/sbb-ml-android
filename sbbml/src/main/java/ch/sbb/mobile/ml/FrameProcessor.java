@@ -13,7 +13,6 @@ import android.os.SystemClock;
 import android.util.Size;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -46,28 +45,40 @@ class FrameProcessor {
         void info(Size previewSize, Size inputSize, int inferenceTime);
     }
 
-    private byte[][][] yuvBytesBuffer;
-    private int[] rgbBytes;
-    private ExecutorService executorService;
-    private MLSettings mlSettings;
-    private Bitmap rgbFrameBitmap;
-    private TFLiteObjectDetector detector;
-    private MultiBoxTracker multiBoxTracker;
-    private long timestamp = 0;
+    private enum YuvLayer
+    {
+        LAYER_Y(0),
+        LAYER_U(1),
+        LAYER_V(2),
+        LAYER_COUNT(3);
+
+        public final int value;
+        YuvLayer(int value) { this.value = value; }
+    }
+
+    public static final int THREAD_COUNT = 2;
+    public static final int BUFFER_COUNT = 2;
+    private byte[][] yuvBytesBuffer;
+    private final int[] rgbBytes;
+    private final ExecutorService executorService;
+    private final MLSettings mlSettings;
+    private final Bitmap rgbFrameBitmap;
+    private final TFLiteObjectDetector detector;
+    private final MultiBoxTracker multiBoxTracker;
+    private long timestamp;
     private long lastProcessingTimeMs;
-    private final AtomicBoolean isBuffer0Free = new AtomicBoolean(true);
-    private final AtomicBoolean isBuffer1Free = new AtomicBoolean(true);
+    private final AtomicBoolean[] isBufferFree = new AtomicBoolean[BUFFER_COUNT];
     private final AtomicBoolean isDetectingFrame = new AtomicBoolean(false);
     private final List<MultiBoxTracker.TrackedRecognition> frameRecognitions = new ArrayList<>();
-    private Bitmap scaledBitmap;
-    private Matrix frameToScaledTransform;
-    private Matrix scaledToFrameTransform;
-    private FrameProcessorListener frameProcessorListener;
+    private final Bitmap scaledBitmap;
+    private final Matrix frameToScaledTransform;
+    private final Matrix scaledToFrameTransform;
+    private final FrameProcessorListener frameProcessorListener;
 
     public FrameProcessor(Context context, MLSettings mlSettings, int sensorOrientation, FrameProcessorListener frameProcessorListener) throws IOException {
         this.mlSettings = mlSettings;
         this.frameProcessorListener = frameProcessorListener;
-        executorService = Executors.newFixedThreadPool(2);
+        executorService = Executors.newFixedThreadPool(THREAD_COUNT);
         rgbFrameBitmap = Bitmap.createBitmap(mlSettings.getPreviewSize().getWidth(), mlSettings.getPreviewSize().getHeight(), Bitmap.Config.ARGB_8888);
         rgbBytes = new int[mlSettings.getPreviewSize().getWidth() * mlSettings.getPreviewSize().getHeight()];
         scaledBitmap = Bitmap.createBitmap(mlSettings.getModelInputSize(), mlSettings.getModelInputSize(), Bitmap.Config.ARGB_8888);
@@ -81,34 +92,40 @@ class FrameProcessor {
         detector = new TFLiteObjectDetector(context, mlSettings);
         multiBoxTracker = new MultiBoxTracker();
         timestamp = 0;
+
+        for(int bufferIndex = 0; bufferIndex < BUFFER_COUNT; bufferIndex++)
+        {
+            isBufferFree[bufferIndex] = new AtomicBoolean(true);
+        }
     }
 
     public void processImage(Image image, int bufferIndex) {
         final Image.Plane[] planes = image.getPlanes();
-        final int yRowStride = planes[0].getRowStride();
-        final int uvRowStride = planes[1].getRowStride();
-        final int uvPixelStride = planes[1].getPixelStride();
+        final int yRowStride = planes[YuvLayer.LAYER_Y.value].getRowStride();
+        final int uvRowStride = planes[YuvLayer.LAYER_U.value].getRowStride();
+        final int uvPixelStride = planes[YuvLayer.LAYER_U.value].getPixelStride();
 
         // allocate on first run
         // it is not possible to allocate these buffers earlier. in some image formats the yuv image is actually
         // bigger than chosen preview size
         if(yuvBytesBuffer == null) {
-            final int luminanceLength = planes[0].getBuffer().capacity();
-            final int chrominanceLength = planes[1].getBuffer().capacity();
+            final int luminanceLength = planes[YuvLayer.LAYER_Y.value].getBuffer().capacity();
+            final int chrominanceLength = planes[YuvLayer.LAYER_U.value].getBuffer().capacity();
 
-            yuvBytesBuffer = new byte[2][3][];
-            yuvBytesBuffer[0][0] = new byte[luminanceLength];
-            yuvBytesBuffer[0][1] = new byte[chrominanceLength];
-            yuvBytesBuffer[0][2] = new byte[chrominanceLength];
-            yuvBytesBuffer[1][0] = new byte[luminanceLength];
-            yuvBytesBuffer[1][1] = new byte[chrominanceLength];
-            yuvBytesBuffer[1][2] = new byte[chrominanceLength];
+            yuvBytesBuffer = new byte[BUFFER_COUNT * YuvLayer.LAYER_COUNT.value][];
+            for(int iterationIndex = 0; iterationIndex < BUFFER_COUNT; iterationIndex++)
+            {
+                final int buffIndex = iterationIndex * YuvLayer.LAYER_COUNT.value;
+                yuvBytesBuffer[buffIndex + YuvLayer.LAYER_Y.value] = new byte[luminanceLength];
+                yuvBytesBuffer[buffIndex + YuvLayer.LAYER_U.value] = new byte[chrominanceLength];
+                yuvBytesBuffer[buffIndex + YuvLayer.LAYER_V.value] = new byte[chrominanceLength];
+            }
         }
 
-        for (int i = 0; i < planes.length; ++i) {
-            final ByteBuffer buffer = planes[i].getBuffer();
-            buffer.get(yuvBytesBuffer[bufferIndex][i]);
-        }
+        final int bufferPointer = bufferIndex * YuvLayer.LAYER_COUNT.value;
+        planes[YuvLayer.LAYER_Y.value].getBuffer().get(yuvBytesBuffer[bufferPointer + YuvLayer.LAYER_Y.value]);
+        planes[YuvLayer.LAYER_U.value].getBuffer().get(yuvBytesBuffer[bufferPointer + YuvLayer.LAYER_U.value]);
+        planes[YuvLayer.LAYER_V.value].getBuffer().get(yuvBytesBuffer[bufferPointer + YuvLayer.LAYER_V.value]);
 
         Timber.i("onImageAvailable - launch new thread");
         Runnable task = () -> {
@@ -116,31 +133,25 @@ class FrameProcessor {
             timestamp++;
             if(mlSettings.isUseTracker()) {
                 Timber.i("Executing tracker inside : %s", Thread.currentThread().getName());
-                trackFrame(yuvBytesBuffer[bufferIndex][0], timestamp);
+                trackFrame(yuvBytesBuffer[bufferPointer + YuvLayer.LAYER_Y.value], timestamp);
             }
 
             if(isDetectingFrame.get()) {
                 // the detector is already busy, free the buffer and return.
-                image.close();
-                freeBuffer(bufferIndex);
+                freeBufferByIndex(bufferIndex);
                 return;
             }
 
             // run object detector on this frame
             isDetectingFrame.set(true);
-            try {
-                Timber.i("Executing detection inside : %s", Thread.currentThread().getName());
-                yuv2RGB(yRowStride, uvRowStride, uvPixelStride, yuvBytesBuffer[bufferIndex]);
-                scale();
-                detectObjects(yuvBytesBuffer[bufferIndex][0], timestamp);
-            } catch(Exception e) {
-                Timber.e("Buffer overflow. This may happen if input image size is changed on the fly. Just skip this frame.");
-            }
+            Timber.i("Executing detection inside : %s", Thread.currentThread().getName());
+            yuv2RGB(yRowStride, uvRowStride, uvPixelStride, yuvBytesBuffer, bufferPointer);
+            scale();
+            detectObjects(yuvBytesBuffer[bufferPointer + YuvLayer.LAYER_Y.value], timestamp);
             isDetectingFrame.set(false);
 
             // closing the image will enable us the get next image in onImageAvailable() and we also free a buffer to read it.
-            image.close();
-            freeBuffer(bufferIndex);
+            freeBufferByIndex(bufferIndex);
         };
         executorService.execute(task);
     }
@@ -159,7 +170,7 @@ class FrameProcessor {
 
     private synchronized void publishTrackerResults() {
         frameRecognitions.clear();
-        CopyOnWriteArrayList<MultiBoxTracker.TrackedRecognition> unmutableCopyOfTrackedRecognitions = new CopyOnWriteArrayList(multiBoxTracker.publish());
+        CopyOnWriteArrayList<MultiBoxTracker.TrackedRecognition> unmutableCopyOfTrackedRecognitions = new CopyOnWriteArrayList<>(multiBoxTracker.publish());
         for (final MultiBoxTracker.TrackedRecognition result : unmutableCopyOfTrackedRecognitions) {
             if ((result != null) && (result.getTrackedObject() != null) && (result.getTrackedObject().isValid())) {
                 frameRecognitions.add(result);
@@ -172,11 +183,11 @@ class FrameProcessor {
     private void detectObjects(byte[] luminance, long lastTimestamp) {
         Timber.i("detectObjects");
         final long startTime = SystemClock.uptimeMillis();
-        List<MLRecognition> results = new ArrayList<>();
+        List<MLRecognition> results;
         try {
             results = detector.recognizeImage(scaledBitmap);
         } catch (IOException e) {
-            frameProcessorListener.error("Object detection failed:" + e.toString());
+            frameProcessorListener.error("Object detection failed:" + e);
             return;
         }
 
@@ -242,12 +253,12 @@ class FrameProcessor {
         canvas.drawBitmap(rgbFrameBitmap, frameToScaledTransform, null);
     }
 
-    private void yuv2RGB(int yRowStride, int uvRowStride, int uvPixelStride, byte[][] yuvBytes) {
+    private void yuv2RGB(int yRowStride, int uvRowStride, int uvPixelStride, byte[][] yuvBytes, final int bufferPointer) {
         Timber.i("yuv2RGB");
         ImageUtils.convertYUV420ToARGB8888(
-                yuvBytes[0],
-                yuvBytes[1],
-                yuvBytes[2],
+                yuvBytes[bufferPointer + YuvLayer.LAYER_Y.value],
+                yuvBytes[bufferPointer + YuvLayer.LAYER_U.value],
+                yuvBytes[bufferPointer + YuvLayer.LAYER_V.value],
                 rgbBytes,
                 mlSettings.getPreviewSize().getWidth(),
                 mlSettings.getPreviewSize().getHeight(),
@@ -257,27 +268,24 @@ class FrameProcessor {
                 false);
   }
 
-    int reserveBuffer() {
-        if(isBuffer0Free.get()) {
-            Timber.i("reserveBuffer 0");
-            isBuffer0Free.set(false);
-            return 0;
-        } else if(isBuffer1Free.get()) {
-            Timber.i("reserveBuffer 1");
-            isBuffer1Free.set(false);
-            return 1;
-        } else {
-            return -1;
+    int getFreeBufferIndex()
+    {
+        for(int bufferIndex = 0; bufferIndex < BUFFER_COUNT; bufferIndex++)
+        {
+            if(isBufferFree[bufferIndex].get())
+            {
+                Timber.i("Buffer Index %d reserved", bufferIndex);
+                isBufferFree[bufferIndex].set(false);
+                return bufferIndex;
+            }
         }
+        Timber.i("No free buffer could be found");
+        return -1;
     }
 
-    void freeBuffer(int index) {
+    void freeBufferByIndex(int index) {
         // this will just mark buffer as free
         Timber.i("Free buffer %d", index);
-        if(index == 0) {
-            isBuffer0Free.set(true);
-        } else if(index == 1) {
-            isBuffer1Free.set(true);
-        }
+        isBufferFree[index].set(true);
     }
 }

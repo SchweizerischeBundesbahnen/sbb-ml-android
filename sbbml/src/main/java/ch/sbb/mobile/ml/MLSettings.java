@@ -45,7 +45,7 @@ public class MLSettings {
     private float minObjectSize;
     /**
      * Intersection over union. Used to control how much object bounding box overlapping is allowed.
-     * https://medium.com/analytics-vidhya/iou-intersection-over-union-705a39e7acef
+     * <a href="https://medium.com/analytics-vidhya/iou-intersection-over-union-705a39e7acef">...</a>
      */
     private float iou;
     /**

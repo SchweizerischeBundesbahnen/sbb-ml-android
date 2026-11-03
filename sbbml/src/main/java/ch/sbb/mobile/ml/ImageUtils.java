@@ -33,7 +33,7 @@ class ImageUtils {
       }
     }
 
-    if (bigEnough.size() > 0) {
+    if (!bigEnough.isEmpty()) {
       return Collections.min(bigEnough, new CompareSizesByArea());
     } else {
       return choices[0];
@@ -59,7 +59,9 @@ class ImageUtils {
     final File myDir = new File(root);
     final File file = new File(myDir, filename);
     if (file.exists()) {
-      file.delete();
+        boolean isFileDeleted = file.delete();
+        if(isFileDeleted) { Timber.i("File deleted"); }
+        else { Timber.e("File not deleted"); }
     }
     try {
       final FileOutputStream out = new FileOutputStream(file);

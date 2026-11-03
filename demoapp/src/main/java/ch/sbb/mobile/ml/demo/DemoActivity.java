@@ -12,7 +12,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
@@ -41,12 +40,11 @@ import timber.log.Timber;
   in assets.
  */
 public class DemoActivity extends FragmentActivity implements MLView.DetectionListener {
-
-  private List<String> processorStrings = Arrays.asList("CPU", "GPU", "NNAPI");
-  private List<String> modelStrings = Arrays.asList("yolov5n", "yolov5s6");
-  private String modelPrefix = "wagen";
-  private List<String> typeStrings = Arrays.asList("float32", "int8");
-  private List<String> imgSizeStrings = Arrays.asList("576", "512", "448", "384");
+    private static final String MODEL_PREFIX = "wagen";
+  private final List<String> processorStrings = Arrays.asList("CPU", "GPU", "NNAPI");
+  private final List<String> modelStrings = Arrays.asList("yolov5n", "yolov5s6");
+  private final List<String> typeStrings = Arrays.asList("float32", "int8");
+  private final List<String> imgSizeStrings = Arrays.asList("576", "512", "448", "384");
 
   protected int defaultDeviceIndex = 0;
   protected int defaultTypeIndex = 0;
@@ -119,22 +117,19 @@ public class DemoActivity extends FragmentActivity implements MLView.DetectionLi
                 @Override
                 public void onStateChanged(@NonNull View bottomSheet, int newState) {
                   switch (newState) {
-                    case BottomSheetBehavior.STATE_HIDDEN:
+                      case BottomSheetBehavior.STATE_EXPANDED:
+                      {
+                          binding.bottomSheet.bottomSheetArrow.setImageResource(R.drawable.icn_chevron_down);
+                      }
                       break;
-                    case BottomSheetBehavior.STATE_EXPANDED:
-                    {
-                      binding.bottomSheet.bottomSheetArrow.setImageResource(R.drawable.icn_chevron_down);
-                    }
-                    break;
-                    case BottomSheetBehavior.STATE_COLLAPSED:
-                    {
+                      case BottomSheetBehavior.STATE_COLLAPSED:
+                      case BottomSheetBehavior.STATE_SETTLING:
+                      {
                       binding.bottomSheet.bottomSheetArrow.setImageResource(R.drawable.icn_chevron_up);
-                    }
-                    break;
-                    case BottomSheetBehavior.STATE_DRAGGING:
+                      }
                       break;
-                    case BottomSheetBehavior.STATE_SETTLING:
-                      binding.bottomSheet.bottomSheetArrow.setImageResource(R.drawable.icn_chevron_up);
+                      case BottomSheetBehavior.STATE_HIDDEN:
+                      case BottomSheetBehavior.STATE_DRAGGING:
                       break;
                   }
                 }
@@ -182,12 +177,7 @@ public class DemoActivity extends FragmentActivity implements MLView.DetectionLi
         }
       });
 
-      binding.bottomSheet.trackerSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-          updateSettings();
-        }
-      });
+      binding.bottomSheet.trackerSwitch.setOnCheckedChangeListener((compoundButton, b) -> updateSettings());
 
       binding.bottomSheet.confText.setText("Confidence " + binding.bottomSheet.confSlider.getValue());
       binding.bottomSheet.iouText.setText("Iou " + binding.bottomSheet.iouSlider.getValue());
@@ -195,8 +185,8 @@ public class DemoActivity extends FragmentActivity implements MLView.DetectionLi
 
       multiBoxRenderer = new MultiBoxRenderer(this);
 
-      String filename = getModelFilename(modelStrings.get(0), typeStrings.get(0), imgSizeStrings.get(0));
-      mlSettings = new MLSettings(DESIRED_PREVIEW_SIZE_BIG, filename, Integer.parseInt(imgSizeStrings.get(0)));
+      String filename = getModelFilename(modelStrings.getFirst(), typeStrings.getFirst(), imgSizeStrings.getFirst());
+      mlSettings = new MLSettings(DESIRED_PREVIEW_SIZE_BIG, filename, Integer.parseInt(imgSizeStrings.getFirst()));
       binding.bottomSheet.modelInfo.setText(filename);
 
       setFragment();
@@ -204,7 +194,7 @@ public class DemoActivity extends FragmentActivity implements MLView.DetectionLi
   }
 
   public String getModelFilename(final String model, final String type, final String inputSize) {
-    String modelFilename = modelPrefix;
+    String modelFilename = MODEL_PREFIX;
     modelFilename += "_" + model;
     modelFilename += "_" + inputSize;
     modelFilename += "_" + type;
@@ -222,7 +212,7 @@ public class DemoActivity extends FragmentActivity implements MLView.DetectionLi
 
   void updateFrameTime() {
     final long updateTime = SystemClock.uptimeMillis() - lastUpdateTimestamp;
-    inferenceTimeTotalMillis += updateTime;
+    inferenceTimeTotalMillis += (int) updateTime;
     numUpdatesPerSec++;
 
     if(inferenceTimeTotalMillis > 1000) {
@@ -247,13 +237,11 @@ public class DemoActivity extends FragmentActivity implements MLView.DetectionLi
     mlSettings.setNumberOfThreds((int)(binding.bottomSheet.threadsSlider.getValue()));
     id = binding.bottomSheet.deviceList.getCheckedItemPosition();
     String deviceString = binding.bottomSheet.deviceList.getItemAtPosition(id).toString();
-    if (deviceString.equals("GPU")) {
-      mlSettings.setProcessor(MLSettings.Processor.GPU);
-    } else if (deviceString.equals("NNAPI")) {
-      mlSettings.setProcessor(MLSettings.Processor.NNAPI);
-    } else if (deviceString.equals("CPU")) {
-      mlSettings.setProcessor(MLSettings.Processor.CPU);
-    }
+      switch (deviceString) {
+          case "GPU" -> mlSettings.setProcessor(MLSettings.Processor.GPU);
+          case "NNAPI" -> mlSettings.setProcessor(MLSettings.Processor.NNAPI);
+          case "CPU" -> mlSettings.setProcessor(MLSettings.Processor.CPU);
+      }
     id = binding.bottomSheet.typeList.getCheckedItemPosition();
     String typeString = binding.bottomSheet.typeList.getItemAtPosition(id).toString();
 
@@ -274,32 +262,17 @@ public class DemoActivity extends FragmentActivity implements MLView.DetectionLi
 
   @Override
   public void previewSize(Size previewSize) {
-    runOnUiThread(new Runnable() {
-      @Override
-      public void run() {
-        binding.bottomSheet.frameInfo.setText(previewSize.toString());
-      }
-    });
+    runOnUiThread(() -> binding.bottomSheet.frameInfo.setText(previewSize.toString()));
   }
 
   @Override
   public void inputSize(Size inputSize) {
-    runOnUiThread(new Runnable() {
-      @Override
-      public void run() {
-        binding.bottomSheet.scaleInfo.setText(inputSize.toString());
-      }
-    });
+    runOnUiThread(() -> binding.bottomSheet.scaleInfo.setText(inputSize.toString()));
   }
 
   @Override
   public void inferenceTime(int inferenceTime) {
-    runOnUiThread(new Runnable() {
-      @Override
-      public void run() {
-        binding.bottomSheet.inferenceInfo.setText(String.valueOf(inferenceTime));
-      }
-    });
+    runOnUiThread(() -> binding.bottomSheet.inferenceInfo.setText(String.valueOf(inferenceTime)));
   }
 
   @Override
@@ -309,18 +282,13 @@ public class DemoActivity extends FragmentActivity implements MLView.DetectionLi
   }
 
   @Override
-  public void permissonDenied() {
-    // the developer can request camera permisson in the app code.
+  public void permissionDenied() {
+    // the developer can request camera permission in the app code.
     // this method is used to inform user about missing camera permission, the inference module cannot run.
   }
 
   @Override
   public void runError(String errorMsg) {
-    runOnUiThread(new Runnable() {
-      @Override
-      public void run() {
-        binding.bottomSheet.errorInfo.setText(errorMsg);
-      }
-    });
+    runOnUiThread(() -> binding.bottomSheet.errorInfo.setText(errorMsg));
   }
 }

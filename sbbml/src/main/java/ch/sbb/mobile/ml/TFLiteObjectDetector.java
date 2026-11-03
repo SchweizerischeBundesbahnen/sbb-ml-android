@@ -179,7 +179,7 @@ class TFLiteObjectDetector {
     } catch (Exception e) {
       Timber.e("Failed to run the model %s", e.toString());
       Trace.endSection();
-      throw new IOException("failed to run: " + e.toString());
+      throw new IOException("failed to run: " + e);
     }
     Trace.endSection();
 

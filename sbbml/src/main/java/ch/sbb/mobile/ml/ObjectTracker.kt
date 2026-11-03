@@ -36,7 +36,7 @@ internal class ObjectTracker protected  constructor(protected val frameWidth: In
     /** This will contain an opaque pointer to the native ObjectTracker  */
     private val nativeObjectTracker: Long = 0
 
-    private class TimestampedDeltas(internal val timestamp: Long, internal val deltas: ByteArray)
+    private class TimestampedDeltas(val timestamp: Long, val deltas: ByteArray)
 
     /**
      * A simple class that records keypoint information, which includes
@@ -75,7 +75,7 @@ internal class ObjectTracker protected  constructor(protected val frameWidth: In
      */
     class PointChange(x1: Float, y1: Float,
                       x2: Float, y2: Float,
-                      score: Float, type: Int, public var wasFound: Boolean) {
+                      score: Float, type: Int, var wasFound: Boolean) {
         val keypointA: Keypoint
         val keypointB: Keypoint
 
@@ -294,7 +294,7 @@ internal class ObjectTracker protected  constructor(protected val frameWidth: In
 
         private fun checkValidObject() {
             if (isDead) {
-                ;//error("TrackedObject already removed from tracking!")
+                //error("TrackedObject already removed from tracking!")
             } else if (this@ObjectTracker !== instance) {
                 error("TrackedObject created with another ObjectTracker!")
             }
